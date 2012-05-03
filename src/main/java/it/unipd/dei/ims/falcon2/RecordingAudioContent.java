@@ -3,10 +3,7 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 import java.io.OutputStream;
 
-/**
-	Represents a song audio content, as a linked-list of chroma segments.
-	TODO finish writing documentation
- */
+/** Represents a song audio content, as a linked-list of chroma segments. */
 public class RecordingAudioContent {
 
 	private class Segment {
@@ -51,6 +48,7 @@ public class RecordingAudioContent {
 			}
 		}
 
+		/** Local similarity, between two segments */
 		public float similarityTo(Segment b) {
 			Segment a = this;
 			int i = 0;   // on segment a
@@ -69,10 +67,7 @@ public class RecordingAudioContent {
 			return similarity;
 		}
 
-		/** 
-			* representation:
-			* "SEGMENT k1:v1 k2:v2 --- kn:vn END"
-		*/
+		/** representation: "SEGMENT k1:v1 k2:v2 --- kn:vn END" */
 		public String toString() {
 			StringBuilder s = new StringBuilder();
 			s.append("SEGMENT ");
@@ -86,7 +81,7 @@ public class RecordingAudioContent {
 
 	private LinkedList<Segment> segments = null;
 
-	// TODO write docs - overlapping segments stuff ...
+	/** Construct a representation of audio content as a sequence of overlapping segments */
 	public RecordingAudioContent(int[] chromas, int segmentLength, int segmentHopsize) {
 		segments = new LinkedList<Segment>();
 		int from = 0;
@@ -99,6 +94,21 @@ public class RecordingAudioContent {
 		}
 	}
 
+	/** Load the representation of an audio recording from a string. Perform no format checks. */
+	public RecordingAudioContent(String s) {
+		segments = new LinkedList<Segment>();
+		int from = 0;
+		while(s.indexOf("SEGMENT", from) >= 0) {
+			from = s.indexOf("SEGMENT", from);
+			int to = s.indexOf("END", from) + 3;
+			//System.out.println(s.substring(from,to));
+
+			segments.addLast(new Segment(s.substring(from, to)));
+			from = to;
+		}
+	}
+
+	/** compute (asymmetrical) similarity between recordings */
 	public float similarityTo(RecordingAudioContent b) {
 		RecordingAudioContent a = this;
 		float similarity = 1;
@@ -110,6 +120,15 @@ public class RecordingAudioContent {
 		}
 		similarity = (float) Math.pow(similarity, 1./a.segments.size());
 		return similarity;
+	}
+
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		s.append("RECORDINGAUDIOCONTENT ");
+		for(Segment seg : segments)
+			s.append(seg.toString() + " ");
+		s.append("END");
+		return s.toString();
 	}
 
 }
