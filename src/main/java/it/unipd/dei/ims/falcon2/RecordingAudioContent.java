@@ -7,13 +7,14 @@ import java.io.OutputStream;
 	Represents a song audio content, as a linked-list of chroma segments.
 	TODO finish writing documentation
  */
-public class SongContent {
+public class RecordingAudioContent {
 
 	private class Segment {
 		int[] chromaValues;
 		int[] chromaCounts; 
 		int length; // note: this is NOT chromaValues.length, it is sum(chromaCounts)
 
+		/** construct a segment starting from a (partial) integer array */
 		public Segment(int[] chromas, int from, int to) {
 			TreeMap<Integer,Integer> m = new TreeMap<Integer,Integer>();
 			for(int i = from; i < to; i++) {
@@ -36,6 +37,20 @@ public class SongContent {
 			}
 		}
 
+		/** Construct a segment starting from its string representation. No format checks are performed. */
+		public Segment(String s) {
+			String[] ss = s.trim().split(" ");
+			length = 0;
+			chromaValues = new int[ss.length-2];
+			chromaCounts = new int[ss.length-2];
+			for(int i = 1; i < ss.length-1; i++) {
+				String[] kv = ss[i].trim().split(":");
+				chromaValues[i-1] = Integer.parseInt(kv[0]);
+				chromaCounts[i-1] = Integer.parseInt(kv[1]);
+				length += chromaCounts[i-1];
+			}
+		}
+
 		public float similarityTo(Segment b) {
 			Segment a = this;
 			int i = 0;   // on segment a
@@ -54,12 +69,25 @@ public class SongContent {
 			return similarity;
 		}
 
+		/** 
+			* representation:
+			* "SEGMENT k1:v1 k2:v2 --- kn:vn END"
+		*/
+		public String toString() {
+			StringBuilder s = new StringBuilder();
+			s.append("SEGMENT ");
+			for(int i = 0; i < chromaValues.length; i++) 
+				s.append(String.format("%d:%d ", chromaValues[i], chromaCounts[i]));
+			s.append("END");
+			return s.toString();
+		}
+
 	}
 
 	private LinkedList<Segment> segments = null;
 
 	// TODO write docs - overlapping segments stuff ...
-	public SongContent(int[] chromas, int segmentLength, int segmentHopsize) {
+	public RecordingAudioContent(int[] chromas, int segmentLength, int segmentHopsize) {
 		segments = new LinkedList<Segment>();
 		int from = 0;
 		while(from < chromas.length) {
@@ -71,8 +99,8 @@ public class SongContent {
 		}
 	}
 
-	public float similarityTo(SongContent b) {
-		SongContent a = this;
+	public float similarityTo(RecordingAudioContent b) {
+		RecordingAudioContent a = this;
 		float similarity = 1;
 		for(Segment as : a.segments) {
 			float s = 0;
