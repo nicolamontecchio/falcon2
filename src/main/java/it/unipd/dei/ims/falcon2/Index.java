@@ -1,14 +1,8 @@
 package it.unipd.dei.ims.falcon2;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.LinkedList;
+import java.io.*;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 public class Index {
 
